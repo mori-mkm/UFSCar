@@ -1,0 +1,379 @@
+---
+title: "R Notebook"
+output: html_notebook
+
+
+---
+# Importando as bibliotecas e os dados
+```{r}
+####librarys####
+#ACP
+library("readxl")
+library('FactoMineR')
+library('factoextra')
+
+#Visualização
+library("reshape2")
+library("GGally")
+library("ggplot2")
+library("mvtnorm")
+library("corrplot")
+
+
+####Determinando o ditetório de destino do nosso código#### 
+setwd("C:\\Users\\MKM\\OneDrive\\Área de Trabalho\\EAD 2021\\mult2")
+getwd()
+
+####Importando os dados####
+df <- read_excel("dataset.xlsx")
+colnames(df) <- c("comp", "fb_longa","fb_fina","trac_alc","comp_quebra","elast","estres","forca_exp")
+head(df)
+
+```
+# Análise descritiva dos dados
+
+
+
+```{r}
+#### Correlação ####
+
+cormat <- round(cor(df),2)
+melted_cormat <- melt(cormat)
+reorder_cormat <- function(cormat){
+
+  dd <- as.dist((1-cormat)/2)
+  hc <- hclust(dd)
+  cormat <-cormat[hc$order, hc$order]
+}
+
+cormat <- reorder_cormat(cormat)
+cormat
+get_upper_tri <- function(cormat) {
+  cormat[lower.tri(cormat)] <- NA
+  return(cormat)
+}
+upper_tri <- get_upper_tri(cormat)
+
+melted_cormat <- melt(upper_tri, na.rm = TRUE)
+
+ggheatmap <- ggplot(melted_cormat, aes(Var2, Var1, fill = value))+
+  geom_tile(color = "white")+
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                       midpoint = 0, limit = c(-1,1), space = "Lab", 
+                       name="Pearson\nCorrelation") +
+  theme_minimal()+ # minimal theme
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, 
+                                   size = 12, hjust = 1))+
+  coord_fixed()
+
+ggheatmap + 
+  geom_text(aes(Var2, Var1, label = value), color = "black", size = 4) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.border = element_blank(),
+    panel.background = element_blank(),
+    axis.ticks = element_blank(),
+    legend.justification = c(1, 0),
+    legend.position = c(0.6, 0.7),
+    legend.direction = "horizontal")+
+  guides(fill = guide_colorbar(barwidth = 8, barheight = 1,
+                               title.position = "top", title.hjust = 0.5))
+
+
+```
+
+Podemos perceber que a única variável com correlação negativa em relação as demais é a "estresse", pois as demais detêm de correlações positivas entre sí. 
+
+### ggpairs plot com heatmap das correlações
+
+```{r}
+#### ggpairs plot with heatmap of correlation values####
+p <-8
+
+# Matrix of plots
+p1 <- ggpairs(df, lower = list(continuous = "smooth"))  
+# Correlation matrix plot
+p2 <- ggcorr(df, label = TRUE, label_round = 2)
+
+# Get list of colors from the correlation matrix plot
+
+g2 <- ggplotGrob(p2)
+colors <- g2$grobs[[6]]$children[[3]]$gp$fill
+
+# Change background color to tiles in the upper triangular matrix of plots 
+idx <- 1
+for (k1 in 1:(p-1)) {
+  for (k2 in (k1+1):p) {
+    plt <- getPlot(p1,k1,k2) +
+     theme(panel.background = element_rect(fill = colors[idx], color="white"),
+           panel.grid.major = element_line(color=colors[idx]))
+    p1 <- putPlot(p1,plt,k1,k2)
+    idx <- idx+1
+}
+}
+print(p1)
+```
+
+Agora, se observarmos o ggpairs plot com um formato matricial onde na parte triangular inferior se têm a visualização das disperções dos dados entre variáveis duas a duas. E na diagonal principal temos as densidades das variaveis, além disso podemos observar que na parte triangular superior temos a tabela de correlação com um formato de heatmap.
+
+Sobre a análise e sabendo que detemos de poucas observações, fica claro que poucas variáveis tem uma disperssão proxima da normal, como as variáveis "comprimento de quebra", "estresse" e "força de explosão (burst strength)". Em contraponto, as demais variáveis apresentam um comportamento bimodal. 
+
+Vale resaltar que as combinações de variáveis que têm muita semelhança umas com as outras são:
+'
+- "comprimento" com "fração de fibra fina";
+- "comprimento" com "Tração de alcance zero";
+- "fração de fibra fina" com "Tração de alcance zero".
+Já que ambas as densidades dessas variáveis têm desnidades parecidas e correlações entre sí acima de 0.942.
+
+
+
+
+# Análise de Componentes Principais
+
+O código R abaixo calcula a análise do componente principal nos indivíduos / variáveis:
+
+```{r}
+#### ACP ####
+acp <- PCA(df, scale.unit=TRUE, graph=FALSE, quali.sup=8)
+print(acp)
+
+```
+* get_eigenvalue (acp): Extraia os autovalores / variações dos componentes principais
+* fviz_eig (acp): Visualize os valores próprios
+* get_pca_ind (acp), get_pca_var (acp): Extraia os resultados para indivíduos e variáveis, respectivamente.
+* fviz_pca_ind (acp), fviz_pca_var (acp): Visualize os resultados indivíduos e variáveis, respectivamente.
+* fviz_pca_biplot (acp): Faça um biplot de indivíduos e variáveis.
+
+
+## Visualização e interpretação
+
+Os autovalores medem a quantidade de variação representada por cada componente principal. Os autovalores são grandes para os primeiros componentes e pequenos para os componentes subsequentes. Ou seja, os primeiros componentes correspondem às direções com a quantidade máxima de variação no conjunto de dados.
+
+Logo, ao se examinar os autovalores se pode determinar o número de componentes principais a serem considerados. Os autovalores e a proporção de variâncias (isto é, informações) retidas pelos componentes principais (CPs) podem ser extraídos usando a função get_eigenvalue().
+
+```{r}
+#### Autovalores ####
+
+#acp$eig
+acp.val<- get_eigenvalue(acp)
+print(acp.val)
+cat("A variância total é igual á ", sum(acp.val[0:7]))
+
+```
+A soma de todos os autovalores resulta em uma variância total de 7.
+
+A proporção da variação explicada por cada autovalor é dada na segunda coluna. Por exemplo, 5.532 dividido por 7 é igual a 0,7903, ou, cerca de 79.03% da variação é explicada por este primeiro autovalor. A porcentagem cumulativa explicada é obtida somando as sucessivas proporções de variação explicadas até obter os 100% da variância explicada. Por exemplo, 79.03% mais 13.01% é igual a 92.04% e assim por diante. Portanto, cerca de 92.04% da variação é explicada pelos dois primeiros autovalores juntos.
+
+Vale lembrar que os autovalores podem ser usados para determinar o número de componentes principais a serem considerados após a ACP (Kaiser 1961):
+
+* Um autovalor > 1 indica que os CPs são responsáveis por mais variância do que por uma das variáveis originais nos dados padronizados. Isso é comumente usado como um ponto de corte para o qual os CPs são retidos. Isso é verdadeiro apenas quando os dados são padronizados.
+
+
+### Scree Plot
+```{r}
+fviz_eig(acp, addlabels=TRUE, ylim = c(0, 90))
+```
+Perceba que apenas com a primeira dimenssão se obteve 79% da variância total. Mas vamos dar seguimento com as nossas análises utilizando os dois priemiros CPs e assim teremos mais de 92% de representatividade da variância total.
+
+## Gráfico das Variáveis
+```{r}
+
+var <- get_pca_var(acp)
+var
+```
+
+Os componentes de get_pca_var() podem ser usados no gráfico de variáveis da seguinte forma:
+
+var$coord: coordenadas de variáveis para criar um gráfico de dispersão
+var$cos2: representa a qualidade de representação das variáveis no mapa de fatores. É calculado como as coordenadas quadradas: var.cos2 = var.coord * var.coord.
+var$contrib: contém as contribuições (em porcentagem) das variáveis para os componentes principais. A contribuição de uma variável (var) para um determinado componente principal é (em porcentagem): (var.cos2 * 100) / (cos2 total do componente).
+
+### Os diferentes componentes podem ser acessados da seguinte forma:
+```{r}
+# Coordinates
+head(var$coord)
+# Cos2: quality on the factore map
+head(var$cos2)
+# Contributions to the principal components
+head(var$contrib)
+```
+
+Agora, temos uma visualização do primeiro plano fatorial no gráfico a seguir:
+```{r}
+fviz_pca_var(acp,col.var="black")
+```
+O gráfico acima também é conhecido como gráficos de correlação variável. Mostra as relações entre todas as variáveis. Pode ser interpretado da seguinte forma:
+
+Variáveis positivamente correlacionadas são agrupadas.
+Variáveis negativamente correlacionadas são posicionadas em lados opostos da origem do gráfico (quadrantes opostos).
+A distância entre as variáveis e a origem mede a qualidade das variáveis no mapa de fatores. Variáveis que estão longe da origem são bem representadas no mapa de fatores.
+
+E como se nota neste gráfico, temos as mesmas informações levantas no gráfico heatmap sobre essas variáveis.
+
+## Qualidade da representação
+A qualidade de representação das variáveis no mapa de fatores é chamada cos2(cosseno quadrado, coordenadas quadradas). Você pode acessar o cos2 da seguinte forma:
+
+```{r}
+head(var$cos2, 4)
+corrplot(var$cos2, is.corr=FALSE)
+
+```
+Observe que,
+
+Um cos2 alto indica uma boa representação da variável no componente principal. Nesse caso, a variável é posicionada próximo à circunferência do círculo de correlação.
+
+Um cos2 baixo indica que a variável não é perfeitamente representada pelos CPs. Neste caso, a variável está próxima ao centro do círculo.
+##########################################################################
+
+```{r}
+# Total cos2 of variables on Dim.1 and Dim.2
+fviz_cos2(acp, choice = "var", axes = 1:2)
+```
+Para uma determinada variável, a soma do cos2 em todos os componentes principais é igual a um.
+
+Se uma variável é perfeitamente representada por apenas dois componentes principais (Dim.1 e Dim.2), a soma do cos2 nesses dois PCs é igual a um. Neste caso, as variáveis serão posicionadas no círculo de correlações.
+
+
+##########################################################################
+Resumindo:
+
+Os valores cos2 são usados para estimar a qualidade da representação
+Quanto mais próxima uma variável está do círculo de correlações, melhor sua representação no mapa de fatores (e mais importante é interpretar esses componentes)
+As variáveis que estão fechadas no centro do gráfico são menos importantes para os primeiros componentes.
+
+
+```{r}
+# Color by cos2 values: quality on the factor map
+fviz_pca_var(acp, col.var = "cos2",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), 
+             repel = TRUE # Avoid text overlapping
+             )
+```
+
+```{r}
+# Change the transparency by cos2 values
+fviz_pca_var(acp, alpha.var = "cos2")
+```
+
+## Contribuições de variáveis para CPs
+
+
+```{r}
+head(var$contrib, 8)
+corrplot(var$contrib, is.corr=FALSE)    
+```
+
+
+
+```{r}
+# Contributions of variables to PC1
+fviz_contrib(acp, choice = "var", axes = 1, top = 10)
+```
+
+
+```{r}
+# Contributions of variables to PC2
+fviz_contrib(acp, choice = "var", axes = 2, top = 10)
+```
+
+
+```{r}
+fviz_contrib(acp, choice = "var", axes = 1:2, top = 10)
+```
+
+```{r}
+fviz_pca_var(acp, col.var = "contrib",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07")
+             )
+```
+
+```{r}
+# Change the transparency by contrib values
+fviz_pca_var(acp, alpha.var = "contrib")
+```
+
+
+## Gráfico de indivíduos
+
+```{r}
+ind <- get_pca_ind(acp)
+ind
+```
+
+
+
+
+
+
+
+```{r}
+# Coordinates of individuals
+head(ind$coord)
+# Quality of individuals
+head(ind$cos2)
+# Contributions of individuals
+head(ind$contrib)
+```
+
+
+### Parcelas: qualidade e contribuição
+
+```{r}
+fviz_pca_ind(acp)
+```
+
+
+
+
+```{r}
+fviz_pca_ind(acp, col.ind = "cos2", 
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE # Avoid text overlapping (slow if many points)
+             )
+```
+
+
+
+
+```{r}
+fviz_pca_ind(acp, col.ind = "cos2", pointsize = "cos2",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE # Avoid text overlapping (slow if many points)
+             )
+```
+
+
+
+
+
+```{r}
+fviz_cos2(acp, choice = "ind")
+
+```
+
+
+
+
+
+
+```{r}
+# Total contribution on PC1 and PC2
+fviz_contrib(acp, choice = "ind", axes = 1:2)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+
+```
