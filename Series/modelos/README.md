@@ -8,18 +8,3 @@
 - um modelo ajustado
 - uma justificativa para a escolha do modelo  <h3>
   
-  <div>
-  <h4>Uma prévia dos resultados:<h4>
-    
- 
-* A série é de natureza estacionária;   
-  
-<img src="https://github.com/mori-mkm/UFSCar/blob/main/Series/modelos/imagens/grafico_serie.png?raw=true" align="center"/>
-
-* Foi utilizado um modelo autoregressivo para modelar tal série;
-<img src="https://github.com/mori-mkm/UFSCar/blob/main/Series/modelos/imagens/modelo_seire.png?raw=true" align="center"/>
-
-* E os residiuos se têm uma média igual a zero e apresentam uma variancia constante. Além dos erros apresentarem uma distribuição normal.
-<img src="https://github.com/mori-mkm/UFSCar/blob/main/Series/modelos/imagens/residuos_serie.png?raw=true" align="center"/>
-    
- O mais importante é que está série foi feita inteiramente com a linguagem Python. 
