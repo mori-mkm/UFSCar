@@ -1,4 +1,13 @@
-## Fonte dos códigos
+install.packages("fGarch")
+install.packages("quantmod")
+install.packages("rugarch")
+install.packages("tidyverse")
+install.packages("ggthemes")
+install.packages("forecast")
+install.packages("tseries")
+install.packages("gridExtra")
+
+## Fonte dos cï¿½digos
 ## https://rpubs.com/ionaskel/VaR_Garch_market_risk
 library(fGarch)
 library(quantmod)
@@ -24,48 +33,62 @@ length(dados$TIM)
 
 ## Grafico da serie
 qplot(x = 1:length(dados$TIM) , y = dados$TIM , geom = 'line') +
-      geom_line(color = 'darkblue') +
-      labs(x = '' , y = 'Preço' , title = "TIMS3.sa") + 
-      geom_hline(yintercept = mean(dados$TIM) , color = 'red')
+  geom_line(color = 'darkblue') +
+  labs(x = '' , y = 'Preï¿½o' , title = "TIMS3.sa") + 
+  geom_hline(yintercept = mean(dados$TIM) , color = 'red')
 
-## Gráfico do Log-Retorno
+## Grï¿½fico do Log-Retorno
 
 p1 = qplot(x = 1:length(dados$TIM_log) , y = dados$TIM_log , geom = 'line') + 
-     geom_line(color = 'darkblue') + 
-     geom_hline(yintercept = mean(dados$TIM_log) , color = 'red' , size = 1) + 
-     labs(x = '' , y = 'Log-retornos diários')
+  geom_line(color = 'darkblue') + 
+  geom_hline(yintercept = mean(dados$TIM_log) , color = 'red' , size = 1) + 
+  labs(x = '' , y = 'Log-retornos diï¿½rios')
 
 p2 = qplot(dados$TIM_log , geom = 'density') +
-     coord_flip() + 
-     geom_vline(xintercept = mean(dados$TIM_log) , color = 'red' , size = 1) +
-     geom_density(fill = 'lightblue' , alpha = 0.4) + 
-     labs(x = '')
+  coord_flip() + 
+  geom_vline(xintercept = mean(dados$TIM_log) , color = 'red' , size = 1) +
+  geom_density(fill = 'lightblue' , alpha = 0.4) + 
+  labs(x = '')
 
 grid.arrange(p1 , p2 , ncol = 2)
 
 ## Estacionariedade do Log-Retorno
 
-adf.test(dados$TIM_log) # Um valor P pequeno (<0,01), então a serie do log-retorno é estacionária.
+adf.test(dados$TIM_log) 
+### Um valor P pequeno (<0,01), entï¿½o a serie do log-retorno ï¿½ estacionï¿½ria.
 
 
 
-# Estimação de modelos Metodologia Box-Jenkins
+# Estimaï¿½ï¿½o de modelos Metodologia Box-Jenkins
 model.arima = auto.arima(dados$TIM_log , max.order = c(3 , 0 ,3) , stationary = TRUE , trace = T , ic = 'aicc')
-### O melhor modelo neste caso é o ARIMA(5,0,0)
+### O melhor modelo neste caso ï¿½ o ARIMA(5,0,0)
 model.arima
-## Verificação de diagnóstico para o modelo ARIMA(5,0,0)
+## Verificaï¿½ï¿½o de diagnï¿½stico para o modelo ARIMA(5,0,0)
 model.arima$residuals %>% ggtsdisplay(plot.type = 'hist' )
 ## Teste de hipotese para os parametros do modelo ARIMA
 ar.res = model.arima$residuals
-Box.test(model.arima$residuals , lag = 30 , fitdf = 2 , type = 'Ljung-Box')
-### Rejeitamos a hipotese nula e temos evidencias de que os residuos não se comportam como residuo branco
+Box.test(model.arima$residuals , lag = 20 , fitdf = 2 , type = 'Ljung-Box')
+### Rejeitamos a hipotese nula e temos evidencias de que os residuos 
+###  se comportam como residuo branco
+## QQPLOT dos residuos
+qqnorm(ar.res, pch = 1, frame = FALSE)
+qqline(ar.res, col = "steelblue", lwd = 2)
 
-## Analisando a autocorrelação dos residuos ao quadrado
+
+## Analisando a autocorrelaï¿½ï¿½o dos residuos ao quadrado
 tsdisplay(ar.res^2 , main = 'Squared Residuals')
-model.spec = ugarchspec(variance.model = list(model = 'sGARCH' , garchOrder = c(1 , 1)) , 
-                        mean.model = list(armaOrder = c(0 , 0)))
-model.fit = ugarchfit(spec = model.spec , data = ar.res , solver = 'solnp')
+
+
+## Modelo para os residuos do log-retorno
+model.spec = ugarchspec(variance.model = list(model = 'sGARCH' , 
+                        garchOrder = c(1 , 1)) , 
+                        mean.model = list(armaOrder = c(1 , 0)))
+model.fit = ugarchfit(spec = model.spec , data = dados$TIM_log , 
+                      solver = 'solnp')
 options(scipen = 999)
 model.fit@fit$matcoef
-### Tanto a1 quanto ??1 são significativamente diferentes de zero, portanto, é razoável assumir a volatilidade dos resíduos com variação no tempo.
+### Tanto a1 quanto ??1 sï¿½o significativamente diferentes de zero, portanto, ï¿½
+###  razoï¿½vel assumir a volatilidade dos resï¿½duos com variaï¿½ï¿½o no tempo.
+model.fit
 
+length(dados$TIM_log)
