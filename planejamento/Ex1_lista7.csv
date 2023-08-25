@@ -1,0 +1,25 @@
+Peca,Produtividade,Operario,Maquina
+Peca 1,"30,66",1,Maquina 1
+Peca 2,"30,78",1,Maquina 1
+Peca 3,"30,82",1,Maquina 1
+Peca 1,"30,85",2,Maquina 1
+Peca 2,31,2,Maquina 1
+Peca 3,"30,87",2,Maquina 1
+Peca 1,"30,97",1,Maquina 2
+Peca 2,"30,97",1,Maquina 2
+Peca 3,"30,95",1,Maquina 2
+Peca 1,"30,67",2,Maquina 2
+Peca 2,"30,75",2,Maquina 2
+Peca 3,"30,81",2,Maquina 2
+Peca 1,"31,03",1,Maquina 3
+Peca 2,"31,01",1,Maquina 3
+Peca 3,"30,93",1,Maquina 3
+Peca 1,"30,76",2,Maquina 3
+Peca 2,"30,69",2,Maquina 3
+Peca 3,"30,69",2,Maquina 3
+Peca 1,"30,77",1,Maquina 4
+Peca 2,"30,69",1,Maquina 4
+Peca 3,"30,71",1,Maquina 4
+Peca 1,"31,03",2,Maquina 4
+Peca 2,"31,09",2,Maquina 4
+Peca 3,"30,89",2,Maquina 4
