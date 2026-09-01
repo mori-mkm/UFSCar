@@ -1,46 +1,73 @@
-# Análise de Riscos - Modelo de Regressão Logística
+# Credit Risk Analysis
 
-Este repositório contém um script em R desenvolvido para a disciplina de **Análise de Riscos**. O objetivo do estudo é explorar dados de risco de crédito e construir um modelo de regressão logística para prever a classificação de pagadores.
+Statistical analysis and classification project developed as part of the **Risk Analysis** coursework at UFSCar.
 
-## 📂 Estrutura do Projeto
+The project explores credit profile data and applies **Logistic Regression** to estimate the probability of a borrower being classified into different payment-risk categories.
 
-- `dados.txt`: Arquivo contendo os dados utilizados na análise.
-- `analise_riscos.R`: Script principal com importação, exploração, visualização e modelagem dos dados.
+## Overview
 
-## 📊 Descrição do Projeto
+The analysis combines exploratory data analysis, statistical visualization and predictive modeling to investigate patterns associated with credit risk.
 
-### 1️⃣ Importação dos Dados
-Os dados são carregados diretamente de um repositório remoto e transformados em um `data.frame`. Os nomes das colunas são definidos conforme suas respectivas variáveis.
+The workflow includes:
 
-### 2️⃣ Exploração e Visualização
-- Geração de **sumários estatísticos** das variáveis quantitativas.
-- Construção de **gráficos de dispersão**, **boxplots** e **gráficos 3D** para identificar padrões nos dados.
+* Data preparation and variable encoding
+* Exploratory analysis of quantitative and categorical variables
+* Distribution and relationship analysis
+* Train/test split for model evaluation
+* Logistic Regression
+* Variable selection using stepwise regression
+* Model comparison using predictive accuracy and deviance
 
-### 3️⃣ Modelagem Estatística
-- Construção de um **modelo de regressão logística** para prever a classificação do pagador.
-- Testes de desempenho e seleção de variáveis via **stepwise**.
-- Visualização dos resultados do modelo.
+## Modeling Approach
 
-## 📌 Tecnologias Utilizadas
+The dataset is divided into **80% training data and 20% test data**.
 
-- `R` e pacotes:
-  - `data.table`
-  - `ggplot2`
-  - `GGally`
-  - `scatterplot3d`
-  - `FactoClass`
-  - `caret`
-  - `tidyverse`
+Several Logistic Regression specifications are evaluated, including:
 
-## 📈 Resultados Obtidos
+* A full model using all available predictors
+* A reduced model using selected credit-related variables
+* A stepwise-selected model
 
-Os modelos construídos foram avaliados com base em sua **acurácia preditiva** e **deviance**. O melhor modelo encontrado foi aquele que inclui variáveis selecionadas via `stepwise`, garantindo um melhor ajuste aos dados.
+Predictions are generated using a probability threshold of `0.5`, and model performance is compared using classification accuracy and model deviance.
 
+## Exploratory Analysis
 
-## 📜 Licença
-Este projeto é distribuído sob a licença MIT.
+The project includes several approaches for understanding the relationships between borrower characteristics and credit risk:
 
----
-✍️ **Autor:** Matheus Mori
+* Descriptive statistics
+* Pairwise variable analysis
+* Boxplots
+* Scatter plots
+* Logistic probability curves
+* Three-dimensional visualization
 
+Variables explored include credit amount, credit duration, age, account status, savings profile, employment information and other borrower characteristics.
 
+## Repository Structure
+
+```text
+Analise-de-riscos/
+├── T1.R
+├── dados.txt
+└── README.md
+```
+
+`T1.R` contains the complete analysis and modeling workflow, while `dados.txt` contains the dataset used in the study.
+
+## Tech Stack
+
+**R**
+
+Main libraries:
+
+* `data.table`
+* `ggplot2`
+* `GGally`
+* `scatterplot3d`
+* `FactoClass`
+* `caret`
+* `tidyverse`
+
+## Academic Context
+
+This project was developed during the Statistics undergraduate program at the **Federal University of São Carlos (UFSCar)** as an applied exercise in credit risk analysis and statistical classification.
