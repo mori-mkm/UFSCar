@@ -1,68 +1,79 @@
-# Undergraduate Thesis
+# Wavelet Multivariate Time Series Analysis
 
-Statistics undergraduate thesis work combining meteorological data from INMET (Brazil's National Institute of Meteorology) with financial market series, exploring wavelet-based methods for analyzing time-varying signal structure.
+Undergraduate thesis in Statistics developed at the Federal University of São Carlos (UFSCar) and defended in 2023.
 
-## Workflow
+The study investigates time-varying relationships among four financial series — **IBOVESPA, Dow Jones Industrial Average, S&P 500 and Bitcoin** — using wavelet-based methods. The final application uses daily market data from 2012 to 2023 obtained from Yahoo Finance and combines descriptive time-series analysis with continuous wavelet transforms, multiresolution decomposition, multiscale correlation and wavelet coherence.
 
-The analysis is organized into four notebooks, meant to be read in order:
+## Research objective
 
-### 01 — INMET Data Consolidation
-
-[`01-inmet-data-consolidation.ipynb`](notebooks/01-inmet-data-consolidation.ipynb) reads the raw INMET weather station CSV files (organized by year, one file per station), extracts station metadata from each file's header, groups stations by state, and consolidates them into one averaged daily series per state, saved under `data/inmet-by-state/`.
-
-### 02 — Weather Station Analysis
-
-[`02-weather-station-analysis.ipynb`](notebooks/02-weather-station-analysis.ipynb) loads the automatic and conventional weather station catalogs (`data/station-catalogs/`) and profiles them: counts by operating status and station type, and a pivot table cross-tabulating status against station type.
-
-### 03 — Wavelet Method Exploration
-
-[`03-wavelet-method-exploration.ipynb`](notebooks/03-wavelet-method-exploration.ipynb) is a small methodological experiment applying the Continuous Wavelet Transform (CWT) with `PyWavelets` to a synthetic demo signal, computing and visualizing the resulting scalogram, including a 3D surface visualization of the wavelet coefficients.
-
-### 04 — Financial Market Wavelet Analysis
-
-[`04-financial-market-wavelet-analysis.ipynb`](notebooks/04-financial-market-wavelet-analysis.ipynb) downloads financial index series (Ibovespa, Dow Jones, S&P 500, Nasdaq, USD/BRL, SSE50), handles missing data, and applies the Continuous Wavelet Transform to the Dow Jones and Ibovespa series to inspect their time-scale structure (scalograms and 3D coefficient surfaces). It also includes an exploratory attempt at wavelet coherence analysis using the `piwavelet` package, tested on synthetic random signals rather than the financial series themselves.
-
-### Archived Notebook
-
-[`archive/legacy-complete-workflow.ipynb`](notebooks/archive/legacy-complete-workflow.ipynb) is an earlier, monolithic version of the workflow that combines the station analysis, data consolidation and wavelet exploration steps in a single notebook. It is kept for reference only — the numbered notebooks above are the current, organized version of the analysis.
+The thesis explores wavelets as an alternative framework for studying non-stationary financial time series. Rather than measuring association only at a single global scale, wavelet methods allow relationships to be examined across both time and scale/frequency.
 
 ## Data
 
-```text
-data/
-├── inmet-by-state/       # consolidated daily weather series, one CSV per state
-└── station-catalogs/     # automatic and conventional station metadata
-```
+The final application uses:
 
-### Raw INMET data limitation
+| Series | Symbol used in the code |
+| --- | --- |
+| IBOVESPA | `^BVSP` |
+| Dow Jones Industrial Average | `^DJI` |
+| S&P 500 | `^GSPC` |
+| Bitcoin | `BTC-USD` |
 
-The original raw INMET station files (one CSV per station per year, referenced by notebook 01) are **not versioned in this repository** — only the consolidated, state-level output of that consolidation step is available under `data/inmet-by-state/`. As a result, notebook 01 cannot be re-run end-to-end from this repository alone; it is included to document the consolidation process that produced the datasets used downstream.
+The thesis describes daily observations from January 2012 through July/August 2023, collected from Yahoo Finance through `yfinance` / `pandas_datareader`.
 
-## Repository Structure
+No INMET meteorological data are part of the final defended application.
+
+## Methods
+
+The final thesis applies:
+
+- missing-data inspection and treatment;
+- rolling mean and variance diagnostics;
+- Augmented Dickey-Fuller stationarity tests;
+- Continuous Wavelet Transform (CWT);
+- wavelet scalograms and 3D coefficient visualizations;
+- multiresolution analysis (MODWT/MRA);
+- multiscale wavelet correlation;
+- wavelet coherence.
+
+Python was used for data collection, descriptive analysis, stationarity diagnostics and CWT visualizations. MATLAB was used for multiresolution decomposition, multiscale correlation and wavelet coherence.
+
+## Repository structure
 
 ```text
 undergraduate-thesis/
-├── data/
-│   ├── inmet-by-state/
-│   └── station-catalogs/
-│
-└── notebooks/
-    ├── 01-inmet-data-consolidation.ipynb
-    ├── 02-weather-station-analysis.ipynb
-    ├── 03-wavelet-method-exploration.ipynb
-    ├── 04-financial-market-wavelet-analysis.ipynb
-    └── archive/
-        └── legacy-complete-workflow.ipynb
+├── README.md
+├── requirements.txt
+├── thesis/
+│   └── TCC_MKM_versao_final.pdf
+├── notebooks/
+│   └── financial-wavelet-analysis.ipynb
+└── matlab/
+    └── wavelet-analysis.m
 ```
 
-## Tools
+## Source-code reconstruction
 
-**Python** — `pandas`, `numpy`, `PyWavelets`, `yfinance`, `pandas_datareader`, `missingno`, `matplotlib`, `plotly`, `seaborn`
+The original development folder contained exploratory material from earlier stages of the project, including INMET meteorological experiments. Those files were not part of the final analysis and have been removed from this repository.
 
-## Academic Context
+The Python notebook and MATLAB script in this directory were reconstructed from the code printed in **Appendix A of the final defended thesis**. The reconstruction preserves the original analytical logic. Typographic characters introduced by the PDF/LaTeX rendering were normalized where necessary so the code can be represented as source code.
 
-This is the most substantial project in the repository: the undergraduate thesis (TCC) developed at UFSCar, combining meteorological data engineering with an exploratory application of wavelet analysis to financial time series.
+The appendix itself contains a few inconsistencies between prose, labels and code. They are documented inside the reconstructed notebook rather than silently corrected.
 
-## Reproducibility
+## Python dependencies
 
-Full reproducibility is limited by the missing raw INMET source files (see above) and by hardcoded local file paths in some cells of notebooks 01 and the archived legacy notebook. The consolidated datasets in `data/` allow notebooks 02–04 to be followed without needing the original raw files.
+The thesis did not record exact package versions. The reconstructed notebook uses the packages listed in [`requirements.txt`](requirements.txt).
+
+## Academic context
+
+**Title:** *Análise de séries temporais multivariadas via Wavelet*  
+**English title:** *Wavelet Multivariate Time Series Analysis*  
+**Program:** Bachelor of Statistics, UFSCar  
+**Advisor:** Prof. Dr. Maria Sílvia de Assis Moura  
+**Defense:** August 24, 2023
+
+## Notes on reproducibility
+
+This repository is intended to document the analysis that appears in the final thesis, not every exploratory step taken during its development.
+
+Because the original 2023 environment and exact dependency versions were not preserved, changes in Yahoo Finance access or package APIs may require minor compatibility adjustments to execute the notebook today. Any such modernization should be kept separate from the source-faithful reconstruction.

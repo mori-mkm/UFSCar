@@ -1,0 +1,9 @@
+numpy
+pandas
+matplotlib
+pandas-datareader
+missingno
+PyWavelets
+yfinance
+statsmodels
+seaborn
