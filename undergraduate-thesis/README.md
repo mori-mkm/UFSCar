@@ -2,7 +2,19 @@
 
 Undergraduate thesis in Statistics developed at the Federal University of São Carlos (UFSCar) and defended in 2023.
 
-The study investigates time-varying relationships among four financial series — **IBOVESPA, Dow Jones Industrial Average, S&P 500 and Bitcoin** — using wavelet-based methods. The final application uses daily market data from 2012 to 2023 obtained from Yahoo Finance and combines descriptive time-series analysis with continuous wavelet transforms, multiresolution decomposition, multiscale correlation and wavelet coherence.
+The study investigates time-varying relationships among four financial series — **IBOVESPA, Dow Jones Industrial Average, S&P 500 and Bitcoin** — using wavelet-based methods.
+
+<p align="center">
+  <img
+    src="figures/wavelet-decomposition.png"
+    alt="Wavelet transform represented as a 3D surface and scalogram"
+    width="950"
+  />
+</p>
+
+<p align="center">
+  <em>Continuous Wavelet Transform represented as a 3D coefficient surface and scalogram.</em>
+</p>
 
 ## Research objective
 
